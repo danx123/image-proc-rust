@@ -1,0 +1,60 @@
+name: Build & Publish Rust Module
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+
+jobs:
+  build:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-14 ]
+        python: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install Maturin & NumPy
+        run: pip install maturin numpy
+
+      - name: Build Wheel
+        run: maturin build --release --out dist
+
+      - name: Install & Test
+        run: |
+          pip install dist/*.whl
+          python -c "
+            import numpy as np
+            import image_proc_rust
+            img = np.random.randint(0, 256, (100, 100, 3), np.uint8)
+            gray = image_proc_rust.manual_grayscale(img)
+            sepia = image_proc_rust.apply_sepia(img)
+            inv = image_proc_rust.invert_colors(img)
+            assert gray.shape == (100, 100)
+            assert sepia.shape == (100, 100, 3)
+            assert inv.shape == (100, 100, 3)
+            print('✅ Semua fungsi berjalan lancar!')
+            print(f'   Grayscale: {gray.shape}, Sepia: {sepia.shape}, Invert: {inv.shape}')
+          "
+
+      - name: Upload Artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-py${{ matrix.python }}
+          path: dist/*.whl
