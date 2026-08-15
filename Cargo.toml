@@ -1,0 +1,15 @@
+[package]
+name = "image_proc_rust"
+version = "0.2.0"
+edition = "2021"
+description = "Rust-powered image processing backend for Macan Image Viewer / Macan Efek (numpy-native, tanpa dependensi OpenCV C++)"
+license = "MIT/Apache-2.0"
+
+[lib]
+name = "image_proc_rust"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+numpy = "0.22"
+rayon = "1.10"
