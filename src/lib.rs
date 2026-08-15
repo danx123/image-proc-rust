@@ -53,7 +53,7 @@ fn manual_grayscale<'py>(
 
     let out = Array2::from_shape_vec((h, w), out)
         .map_err(|e| PyValueError::new_err(e.to_string()))?;
-    Ok(out.into_pyarray(py))
+    Ok(out.into_pyarray_bound(py))
 }
 
 /// Terapkan sepia tone — setara dengan versi Python (kernel matrix) tapi jauh lebih cepat.
@@ -87,7 +87,7 @@ fn apply_sepia<'py>(
 
     let out = Array3::from_shape_vec((h, w, channels), out)
         .map_err(|e| PyValueError::new_err(e.to_string()))?;
-    Ok(out.into_pyarray(py))
+    Ok(out.into_pyarray_bound(py))
 }
 
 /// Invert warna gambar (setara cv2.bitwise_not). Mendukung BGR maupun BGRA.
@@ -108,7 +108,7 @@ fn invert_colors<'py>(
 
     let out = Array3::from_shape_vec((h, w, channels), out)
         .map_err(|e| PyValueError::new_err(e.to_string()))?;
-    Ok(out.into_pyarray(py))
+    Ok(out.into_pyarray_bound(py))
 }
 
 /// Daftarkan semua fungsi ke Python
